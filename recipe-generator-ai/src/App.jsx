@@ -69,32 +69,27 @@ function App() {
 
   const clearMsg = () => setTimeout(() => setMsg(""), 3000);
 
+  const forbiddenWords = [
+    "cum", "semen", "sex", "kill", "murder", "death", "abuse", "weapon", "nude", "nudes", "rape",
+    "waste", "toxic", "error", "bug", "suicide", "harm", "gun", "bullet", "bomb", "ammo", "drugs",
+    "him", "her", "me", "you", "by", "robot", "power", "idea", "option", "new", "mail", "come",
+    "has", "done", "deli", "test", "sample", "none", "empty", "blank", "what", "how", "why", "idk"
+  ];
+  
+  // Simple English check (has vowel or 'y')
+  const hasVowelOrY = (word) => /[aeiouy]/.test(word);
+  
+  // Main validator
   const validateIngredient = (word) => {
     const clean = word.trim().toLowerCase();
   
-    const isValidFormat = /^[a-z\s\-]{2,20}$/.test(clean);
-    if (!isValidFormat) return false;
+    const isFormatValid = /^[a-z\s\-]{2,20}$/.test(clean); // Only a-z, spaces, hyphens, 2–20 chars
+    const hasVowel = hasVowelOrY(clean);
+    const isForbidden = forbiddenWords.includes(clean);
   
-    // Allow specific known short terms always
-    const allowList = ["bbq", "msg", "naan", "egg", "soy", "tea", "ice","noodles","rye"];
-    if (allowList.includes(clean)) return true;
-  
-    const isBlacklisted = blacklist.includes(clean);
-  
-    // Must contain at least one vowel or y
-    const hasVowelOrY = /[aeiouy]/.test(clean);
-  
-    // Must NOT contain 3+ consonants in a row (e.g. "fjn", "snd")
-    const hasBadChunk = /[^aeiouy\s\-]{3,}/.test(clean);
-  
-    // Must NOT contain more than 2 identical letters in a row (e.g. "ooo", "ssss")
-    const hasSpamRepeat = /(.)\1{2,}/.test(clean);
-  
-    // Must NOT end in weird repeated vowel sound (e.g. "oooo", "eeee")
-    const weirdEnding = /[aeiou]{3,}$/.test(clean);
-  
-    return hasVowelOrY && !isBlacklisted && !hasBadChunk && !hasSpamRepeat && !weirdEnding;
+    return isFormatValid && hasVowel && !isForbidden;
   };
+  
   
   
   
