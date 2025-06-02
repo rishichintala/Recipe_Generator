@@ -1,19 +1,18 @@
 // netlify/functions/generateRecipe.js
 import fetch from "node-fetch";
 
-// Temporary in-memory cache (only survives during runtime)
+// In-memory cache (non-persistent)
 const cache = new Map();
 const requestHistory = new Map();
 const RATE_LIMIT = 5;
 const RATE_WINDOW_MS = 30 * 1000; // 30 seconds
-
 
 export async function handler(event) {
   try {
     const ip = event.headers["x-nf-client-connection-ip"] || "anon";
     const now = Date.now();
 
-    // Rate limit: store timestamps per IP
+    // Clean up old requests and enforce limit
     requestHistory.set(ip, (requestHistory.get(ip) || []).filter(t => now - t < RATE_WINDOW_MS));
     if (requestHistory.get(ip).length >= RATE_LIMIT) {
       return {
@@ -36,20 +35,28 @@ export async function handler(event) {
       };
     }
 
-    // PROMPT
+    // Prompt setup
     const systemPrompt = `
 You are "Hestia", a friendly home‑cook assistant.
 
 OUTPUT RULES:
-- Return 2–6 recipes only in valid JSON.
-- Each recipe has these keys ONLY (in this order): name, servings, cook_time_minutes, ingredients, optional, instructions.
-- Use all core ingredients and basic pantry items. Avoid repeats from "previousRecipes".
+- Return 2–4 recipes in valid JSON only.
+- Each recipe must include:
+  • name (string, 2–8 words),
+  • servings (integer 1–6),
+  • cook_time_minutes (integer ≤60),
+  • ingredients (string array),
+  • optional (string array),
+  • instructions (5–8 short string steps)
+- No markdown, no explanations.
+- Use all provided core ingredients.
 `.trim();
 
     const userPrompt = `
-Ingredients: ${ingredients.join(", ")}
+Create 2–4 recipes using ALL these ingredients:
+${ingredients.join(", ")}
 
-Use ALL core ingredients. Return JSON array only. Avoid repeats. 5–6 recipes preferred.
+Avoid repeating previous recipes. Output JSON array only.
 `.trim();
 
     const messages = [
@@ -58,12 +65,15 @@ Use ALL core ingredients. Return JSON array only. Avoid repeats. 5–6 recipes p
     ];
 
     if (previousRecipes.length > 0) {
-      messages.push({ role: "assistant", content: JSON.stringify(previousRecipes) });
+      messages.push({
+        role: "assistant",
+        content: JSON.stringify(previousRecipes)
+      });
     }
 
     const payload = {
-      model: "gpt-4o",
-      temperature: 0.9,
+      model: "gpt-3.5-turbo",
+      temperature: 0.7,
       messages
     };
 
@@ -87,9 +97,9 @@ Use ALL core ingredients. Return JSON array only. Avoid repeats. 5–6 recipes p
       recipes = [];
     }
 
-    if (recipes.length < 2 || recipes.length > 6) recipes = [];
+    if (recipes.length < 1 || recipes.length > 6) recipes = [];
 
-    // Cache the result for this input
+    // Store in cache
     cache.set(key, recipes);
 
     return {
