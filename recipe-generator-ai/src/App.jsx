@@ -57,6 +57,7 @@ const blacklist = [
 
 
 ];
+const allowList = ["bbq", "msg", "aioli", "tzatziki", "naan", "gf", "umami", "egg", "rye"];
 
 function App() {
   const [input, setInput] = useState("");
@@ -72,9 +73,16 @@ function App() {
   const validateIngredient = (word) => {
     const clean = word.trim().toLowerCase();
     const isValid = /^[a-z\s\-]{2,20}$/.test(clean);
+  
+    if (!isValid) return false;
+    if (allowList.includes(clean)) return true;
+  
+    const hasVowelOrY = /[aeiouy]/.test(clean);
     const isBlacklisted = blacklist.includes(clean);
-    return isValid && !isBlacklisted;
+  
+    return hasVowelOrY && !isBlacklisted;
   };
+  
 
   const handleAddIngredient = () => {
     const clean = input.trim().toLowerCase();
