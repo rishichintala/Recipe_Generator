@@ -72,7 +72,7 @@ Avoid repeating previous recipes. Output JSON array only.
     }
 
     const payload = {
-      model: "gpt-4o",
+      model: "gpt-3.5-turbo",
       temperature: 0.8,
       messages
     };
