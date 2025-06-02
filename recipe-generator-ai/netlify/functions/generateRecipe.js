@@ -4,8 +4,9 @@ import fetch from "node-fetch";
 // Temporary in-memory cache (only survives during runtime)
 const cache = new Map();
 const requestHistory = new Map();
-const RATE_LIMIT = 5; // Max 5 requests
-const RATE_WINDOW_MS = 5 * 60 * 1000; // Within 5 minutes
+const RATE_LIMIT = 5;
+const RATE_WINDOW_MS = 30 * 1000; // 30 seconds
+
 
 export async function handler(event) {
   try {
