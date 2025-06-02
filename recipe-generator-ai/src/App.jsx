@@ -57,7 +57,6 @@ const blacklist = [
 
 
 ];
-const allowList = ["bbq", "msg", "aioli", "tzatziki", "naan", "gf", "umami", "egg", "rye"];
 
 function App() {
   const [input, setInput] = useState("");
@@ -73,25 +72,31 @@ function App() {
   const validateIngredient = (word) => {
     const clean = word.trim().toLowerCase();
   
-    // Base check: only letters, spaces, hyphens, and correct length
     const isValidFormat = /^[a-z\s\-]{2,20}$/.test(clean);
-  
     if (!isValidFormat) return false;
   
-    // Always allow certain known words even if they fail other rules
+    // Allow specific known short terms always
+    const allowList = ["bbq", "msg", "naan", "egg", "soy", "tea", "ice","noodles","rye"];
     if (allowList.includes(clean)) return true;
   
-    // Must have at least 1 vowel or 'y'
-    const hasVowelOrY = /[aeiouy]/.test(clean);
-  
-    // Must not be a blacklisted word
     const isBlacklisted = blacklist.includes(clean);
   
-    // Must NOT contain 3 or more consecutive consonants (like "jwr" or "ndq")
+    // Must contain at least one vowel or y
+    const hasVowelOrY = /[aeiouy]/.test(clean);
+  
+    // Must NOT contain 3+ consonants in a row (e.g. "fjn", "snd")
     const hasBadChunk = /[^aeiouy\s\-]{3,}/.test(clean);
   
-    return hasVowelOrY && !isBlacklisted && !hasBadChunk;
+    // Must NOT contain more than 2 identical letters in a row (e.g. "ooo", "ssss")
+    const hasSpamRepeat = /(.)\1{2,}/.test(clean);
+  
+    // Must NOT end in weird repeated vowel sound (e.g. "oooo", "eeee")
+    const weirdEnding = /[aeiou]{3,}$/.test(clean);
+  
+    return hasVowelOrY && !isBlacklisted && !hasBadChunk && !hasSpamRepeat && !weirdEnding;
   };
+  
+  
   
   
 
