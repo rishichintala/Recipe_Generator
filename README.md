@@ -50,3 +50,13 @@
 
 - The app adapts beautifully across devices
 - Optimized for desktop, tablet, and mobile screens using Tailwind CSS
+-----
+## 🌟 Show your support
+
+Give a ⭐️ if this project helped you or you liked the project!
+
+## 📫 Contact
+
+Have questions? Reach out to me:
+- 💼 LinkedIn: [Sai Rishith Chintala](https://www.linkedin.com/in/sai-rishith-chintala)
+- 📧 Email: [rishi.chintala19@gmail.com](mailto:rishi.chintala19@gmail.com)
