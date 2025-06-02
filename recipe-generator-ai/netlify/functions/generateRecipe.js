@@ -63,54 +63,56 @@ export async function handler(event) {
     }
 
     /* ---------------- Build prompt ---------------- */
-    const systemPrompt = `
-You are "Hestia", a friendly home‑cook assistant.
+/* ----------  Build prompt  ---------- */
+const systemPrompt = `
+You are “Hestia”, a friendly home-cook assistant.
 
-OUTPUT RULES (MANDATORY)
-1. Respond with *one* JSON array — no markdown or commentary.
-2. Each element has exactly these keys *in this order*:
-   "name", "servings", "cook_time_minutes", "ingredients",
-   "optional", "instructions"
-3. Values:
-   • name: 2–8 words, unique
-   • servings: integer 1–6
-   • cook_time_minutes: integer ≤60
-   • ingredients / optional: string arrays
-   • instructions: 5–8 short step strings
-4. Wrap every key and string value in double quotes.
+↘︎ OUTPUT FORMAT (STRICT)
+Return ONE valid JSON array (no markdown, no prose).
+Each element is an object with these keys IN THIS ORDER:
+"name", "servings", "cook_time_minutes", "ingredients", "optional", "instructions"
 
-COUNT RULE
-• Aim for 5–6 distinct recipes.
-• If ingredients genuinely can’t support 5, provide 2–3.
-• Never output <2 or >6 recipes.
+↘︎ FIELD RULES
+• name               – 2-8 words, unique
+• servings           – integer 1-6
+• cook_time_minutes  – integer ≤60
+• ingredients / optional – string arrays
+• instructions       – 5-8 concise steps
 
-CONTENT RULES
-• Every recipe must use *all* provided core ingredients.
-• You may add common pantry items (oil, salt, pepper, water, basic spices).
-• Keep recipes affordable, simple, and minimise food waste.
+↘︎ QUANTITY RULE
+Always output **exactly 5 recipes** — never more, never fewer.
 
-VARIETY RULE
-Avoid any recipe whose name *or* main ingredient list appears in "previousRecipes" below.
+↘︎ INGREDIENT RULES
+1-2. “Core-Only” block – use *only* the ingredients provided by the user.  
+3-5. “Pantry-Plus” block – may add common pantry staples (oil, salt, pepper, water, basic spices)  
+  or up to two popular complementary items (e.g. avocado, beans).
+
+↘︎ OTHER GUIDELINES
+• Reuse all user-supplied ingredients in every recipe.  
+• Keep recipes affordable and home-kitchen-friendly.  
+• Minimise food waste.  
+• Avoid recipes whose name or main ingredients match “previousRecipes”.
 `.trim();
 
-    const userPrompt = `
+const userPrompt = `
 Core ingredients: ${ingredients.join(", ")}
 
 previousRecipes: ${JSON.stringify(previousRecipes)}
 
-Return ONLY the JSON array as specified.
+Please follow ALL rules above and return ONLY the JSON array.
 `.trim();
 
-    const messages = [
-      { role: "system", content: systemPrompt },
-      { role: "user", content: userPrompt }
-    ];
+const messages = [
+  { role: "system", content: systemPrompt },
+  { role: "user",   content: userPrompt }
+];
 
-    const payload = {
-      model: "gpt-4o",            // upgrade from 3.5‑turbo
-      temperature: 0.8,
-      messages
-    };
+const payload = {
+  model: "gpt-3.5-turbo",
+  temperature: 0.7,
+  max_tokens: 900,
+  messages
+};
 
     /* ---------------- OpenAI call (with in‑flight dedup) ---------------- */
     const openAiCall = fetch("https://api.openai.com/v1/chat/completions", {
