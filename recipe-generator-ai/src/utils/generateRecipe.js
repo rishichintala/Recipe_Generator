@@ -9,10 +9,14 @@ export async function generateRecipePrompt(ingredients) {
       },
       body: JSON.stringify({ ingredients })
     });
+
+    if (response.status === 429) {
+      return { error: "rate-limit", status: 429 };
+    }
+
     const data = await response.json();
     return data;
   } catch (err) {
-    return [];
+    return { error: "unknown", status: 500 };
   }
 }
-

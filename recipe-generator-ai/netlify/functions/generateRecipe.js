@@ -1,75 +1,104 @@
 // netlify/functions/generateRecipe.js
 import fetch from "node-fetch";
 
-export async function handler(event, context) {
+// Temporary in-memory cache (only survives during runtime)
+const cache = new Map();
+const requestHistory = new Map();
+const RATE_LIMIT = 5; // Max 5 requests
+const RATE_WINDOW_MS = 5 * 60 * 1000; // Within 5 minutes
+
+export async function handler(event) {
   try {
-    const { ingredients } = JSON.parse(event.body);
+    const ip = event.headers["x-nf-client-connection-ip"] || "anon";
+    const now = Date.now();
+
+    // Rate limit: store timestamps per IP
+    requestHistory.set(ip, (requestHistory.get(ip) || []).filter(t => now - t < RATE_WINDOW_MS));
+    if (requestHistory.get(ip).length >= RATE_LIMIT) {
+      return {
+        statusCode: 429,
+        body: JSON.stringify({ error: "Too many requests. Please wait and try again." })
+      };
+    }
+    requestHistory.get(ip).push(now);
+
+    const {
+      ingredients = [],
+      previousRecipes = []
+    } = JSON.parse(event.body || "{}");
+
+    const key = JSON.stringify({ ingredients, previousRecipes });
+    if (cache.has(key)) {
+      return {
+        statusCode: 200,
+        body: JSON.stringify(cache.get(key))
+      };
+    }
+
+    // PROMPT
+    const systemPrompt = `
+You are "Hestia", a friendly home‑cook assistant.
+
+OUTPUT RULES:
+- Return 2–6 recipes only in valid JSON.
+- Each recipe has these keys ONLY (in this order): name, servings, cook_time_minutes, ingredients, optional, instructions.
+- Use all core ingredients and basic pantry items. Avoid repeats from "previousRecipes".
+`.trim();
+
+    const userPrompt = `
+Ingredients: ${ingredients.join(", ")}
+
+Use ALL core ingredients. Return JSON array only. Avoid repeats. 5–6 recipes preferred.
+`.trim();
+
+    const messages = [
+      { role: "system", content: systemPrompt },
+      { role: "user", content: userPrompt }
+    ];
+
+    if (previousRecipes.length > 0) {
+      messages.push({ role: "assistant", content: JSON.stringify(previousRecipes) });
+    }
 
     const payload = {
-        model: "gpt-3.5-turbo",
-        messages: [
-          {
-            role: "system",
-            content:
-              "You are a helpful home cook assistant. Respond ONLY in valid JSON. Do not use markdown. " +
-              "Each recipe must include: name, ingredients, optional ingredients, and instructions. " +
-              "Make the output an array of 3-4 simple recipes based on ingredients the user gives."
-          },
-          {
-            role: "user",
-            content:
-              `Ingredients: ${ingredients.join(", ")}\n` +
-              `Return only valid JSON like this:\n\n` +
-              `[{"name":"Recipe Name","ingredients":["item1","item2"],"optional":["opt1"],"instructions":["Step 1","Step 2"]}]\n\n` +
-              `If unsure, just make up practical recipes using everyday items and basic spices.`
-          }
-        ],
-        temperature: 0.7
-      };
+      model: "gpt-4o",
+      temperature: 0.9,
+      messages
+    };
 
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${process.env.OPENAI_API_KEY}`
-        
       },
       body: JSON.stringify(payload)
     });
 
     const data = await response.json();
-    const content = data.choices?.[0]?.message?.content || "[]";
+    const raw = data.choices?.[0]?.message?.content ?? "[]";
 
-    // Fix stringified JSON issues if needed
-    let fixedContent = content;
-    if (typeof content === "string" && content.trim().startsWith('"')) {
-      try {
-        fixedContent = JSON.parse(content); // unwrap double-encoded string
-      } catch {
-        fixedContent = content;
-      }
-    }
-
+    let recipes;
     try {
-      const parsed = typeof fixedContent === "string"
-        ? JSON.parse(fixedContent)
-        : fixedContent;
-
-      return {
-        statusCode: 200,
-        body: JSON.stringify(parsed)
-      };
-    } catch (parseError) {
-      return {
-        statusCode: 200,
-        body: JSON.stringify([]) // fallback empty array
-      };
+      recipes = typeof raw === "string" ? JSON.parse(raw) : raw;
+      if (!Array.isArray(recipes)) throw new Error();
+    } catch {
+      recipes = [];
     }
 
-  } catch (error) {
+    if (recipes.length < 2 || recipes.length > 6) recipes = [];
+
+    // Cache the result for this input
+    cache.set(key, recipes);
+
+    return {
+      statusCode: 200,
+      body: JSON.stringify(recipes)
+    };
+  } catch (err) {
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: "Internal Server Error" })
+      body: JSON.stringify({ error: "Server error. Please try again later." })
     };
   }
 }
