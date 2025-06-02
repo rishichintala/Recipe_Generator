@@ -1,12 +1,44 @@
-# React + Vite
+# 👨‍🍳🤖 What’s Cooking? – AI Recipe Generator
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+![Netlify Status](https://img.shields.io/netlify/your-netlify-site-id?style=flat-square&logo=netlify)
+![License](https://img.shields.io/github/license/your-username/recipe-generator-ai?style=flat-square)
 
-Currently, two official plugins are available:
+> A fun, AI-powered web app that suggests simple, affordable recipes based on ingredients you already have in your fridge. Built with **React + TailwindCSS + OpenAI + Netlify Functions**.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
 
-## Expanding the ESLint configuration
+## 🍽️ Demo
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+https://your-app-name.netlify.app
+
+![Demo Screenshot](./demo.png) <!-- Replace with real screenshot if available -->
+
+---
+
+## ⚡ Features
+
+- 🧠 Powered by **OpenAI GPT-3.5**
+- 🍅 Suggests recipes using user-provided ingredients
+- 📝 Clean JSON-based recipe format
+- 💾 Local save/remove favorite recipes
+- 🌈 Beautiful UI built with **TailwindCSS**
+- 🔐 Secure API key via Netlify Functions
+
+---
+
+## 🛠️ Tech Stack
+
+| Frontend      | Backend          | Deployment      |
+|---------------|------------------|-----------------|
+| React (Vite)  | Netlify Functions | Netlify         |
+| Tailwind CSS  | Node.js + OpenAI API | GitHub Pages    |
+
+---
+
+## 🚀 Getting Started
+
+1. **Clone the repository**
+
+```bash
+git clone https://github.com/your-username/recipe-generator-ai.git
+cd recipe-generator-ai
