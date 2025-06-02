@@ -91,7 +91,7 @@ function App() {
       .filter(Boolean);
   
     if (list.length < 2 || list.length > 15) {
-      setMsg("❌ Please enter 2–15 real ingredients (like 'onion, garlic, pasta').");
+      setMsg("❌ Please enter 2–15 real ingredients (like 'onion, garlic, pasta') or Enter each ingredient one by one!");
       clearMsg();
       return;
     }
@@ -105,7 +105,6 @@ function App() {
       }
       setRecipes(data);
     } catch (err) {
-      console.error("generateRecipePrompt error:", err);
       setMsg("⚠️ Something went wrong. Please try again.");
     } finally {
       clearMsg();
