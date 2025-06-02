@@ -1,62 +1,104 @@
-// netlify/functions/generateRecipe.js
 import fetch from "node-fetch";
 
-// In-memory cache (non-persistent)
-const cache = new Map();
-const requestHistory = new Map();
-const RATE_LIMIT = 5;
-const RATE_WINDOW_MS = 30 * 1000; // 30 seconds
+/* ------------------------------------------------------------------ *
+ * 1. Simple in‑memory maps. Survive warm invocations only.
+ * ------------------------------------------------------------------ */
+const cache = new Map();               // key ➜ { ts, recipes }
+const inflight = new Map();            // key ➜ Promise
+const requestHistory = new Map();      // ip ➜ [timestamps]
 
+const RATE_LIMIT = 5;                  // hits/IP
+const RATE_WINDOW_MS = 30_000;         // per 30 s
+const CACHE_TTL_MS = 12 * 60 * 60 * 1000; // 12 h
+
+/* ------------------------------------------------------------------ *
+ * 2. Helper utilities
+ * ------------------------------------------------------------------ */
+const sortArray = arr => [...arr].sort((a, b) => a.localeCompare(b));
+
+const cacheKey = ({ ingredients, previousRecipes }) =>
+  JSON.stringify({
+    i: sortArray(ingredients),
+    p: previousRecipes.map(r => r.name).sort()   // keep it stable & small
+  });
+
+const withinWindow = (ts, windowMs) => Date.now() - ts < windowMs;
+
+/* ------------------------------------------------------------------ *
+ * 3. Main handler
+ * ------------------------------------------------------------------ */
 export async function handler(event) {
   try {
+    /* ---------------- Rate‑limit per IP ---------------- */
     const ip = event.headers["x-nf-client-connection-ip"] || "anon";
     const now = Date.now();
-
-    // Clean up old requests and enforce limit
-    requestHistory.set(ip, (requestHistory.get(ip) || []).filter(t => now - t < RATE_WINDOW_MS));
-    if (requestHistory.get(ip).length >= RATE_LIMIT) {
+    const hits = (requestHistory.get(ip) || []).filter(t => withinWindow(t, RATE_WINDOW_MS));
+    if (hits.length >= RATE_LIMIT) {
       return {
         statusCode: 429,
-        body: JSON.stringify({ error: "Too many requests. Please wait and try again." })
+        body: JSON.stringify({ error: "Too many requests. Please wait a few seconds." })
       };
     }
-    requestHistory.get(ip).push(now);
+    hits.push(now);
+    requestHistory.set(ip, hits);
 
-    const {
-      ingredients = [],
-      previousRecipes = []
-    } = JSON.parse(event.body || "{}");
-
-    const key = JSON.stringify({ ingredients, previousRecipes });
-    if (cache.has(key)) {
-      return {
-        statusCode: 200,
-        body: JSON.stringify(cache.get(key))
-      };
+    /* ---------------- Parse body ---------------- */
+    const { ingredients = [], previousRecipes = [] } = JSON.parse(event.body || "{}");
+    if (!ingredients.length) {
+      return { statusCode: 400, body: JSON.stringify({ error: "No ingredients supplied." }) };
     }
 
-    // Prompt setup
+    const key = cacheKey({ ingredients, previousRecipes });
+
+    /* ---------------- Serve from cache if fresh ---------------- */
+    const cached = cache.get(key);
+    if (cached && withinWindow(cached.ts, CACHE_TTL_MS)) {
+      return { statusCode: 200, body: JSON.stringify(cached.recipes) };
+    }
+
+    /* ---------------- Share in‑flight requests ---------------- */
+    if (inflight.has(key)) {
+      const recipes = await inflight.get(key);
+      return { statusCode: 200, body: JSON.stringify(recipes) };
+    }
+
+    /* ---------------- Build prompt ---------------- */
     const systemPrompt = `
 You are "Hestia", a friendly home‑cook assistant.
 
-OUTPUT RULES:
-- Return 2–4 recipes in valid JSON only.
-- Each recipe must include:
-  • name (string, 2–8 words),
-  • servings (integer 1–6),
-  • cook_time_minutes (integer ≤60),
-  • ingredients (string array),
-  • optional (string array),
-  • instructions (5–8 short string steps)
-- No markdown, no explanations.
-- Use all provided core ingredients.
+OUTPUT RULES (MANDATORY)
+1. Respond with *one* JSON array — no markdown or commentary.
+2. Each element has exactly these keys *in this order*:
+   "name", "servings", "cook_time_minutes", "ingredients",
+   "optional", "instructions"
+3. Values:
+   • name: 2–8 words, unique
+   • servings: integer 1–6
+   • cook_time_minutes: integer ≤60
+   • ingredients / optional: string arrays
+   • instructions: 5–8 short step strings
+4. Wrap every key and string value in double quotes.
+
+COUNT RULE
+• Aim for 5–6 distinct recipes.
+• If ingredients genuinely can’t support 5, provide 2–3.
+• Never output <2 or >6 recipes.
+
+CONTENT RULES
+• Every recipe must use *all* provided core ingredients.
+• You may add common pantry items (oil, salt, pepper, water, basic spices).
+• Keep recipes affordable, simple, and minimise food waste.
+
+VARIETY RULE
+Avoid any recipe whose name *or* main ingredient list appears in "previousRecipes" below.
 `.trim();
 
     const userPrompt = `
-Create 2–4 recipes using ALL these ingredients:
-${ingredients.join(", ")}
+Core ingredients: ${ingredients.join(", ")}
 
-Avoid repeating previous recipes. Output JSON array only.
+previousRecipes: ${JSON.stringify(previousRecipes)}
+
+Return ONLY the JSON array as specified.
 `.trim();
 
     const messages = [
@@ -64,52 +106,73 @@ Avoid repeating previous recipes. Output JSON array only.
       { role: "user", content: userPrompt }
     ];
 
-    if (previousRecipes.length > 0) {
-      messages.push({
-        role: "assistant",
-        content: JSON.stringify(previousRecipes)
-      });
-    }
-
     const payload = {
-      model: "gpt-3.5-turbo",
+      model: "gpt-4o",            // upgrade from 3.5‑turbo
       temperature: 0.8,
       messages
     };
 
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    /* ---------------- OpenAI call (with in‑flight dedup) ---------------- */
+    const openAiCall = fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${process.env.OPENAI_API_KEY}`
       },
       body: JSON.stringify(payload)
-    });
+    })
+      .then(r => r.json())
+      .then(data => data.choices?.[0]?.message?.content ?? "[]");
 
-    const data = await response.json();
-    const raw = data.choices?.[0]?.message?.content ?? "[]";
+    inflight.set(key, openAiCall);
 
+    let raw;
+    try {
+      raw = await openAiCall;
+    } finally {
+      inflight.delete(key);       // clean no matter what
+    }
+
+    /* ---------------- Parse & validate ---------------- */
     let recipes;
     try {
       recipes = typeof raw === "string" ? JSON.parse(raw) : raw;
-      if (!Array.isArray(recipes)) throw new Error();
+      if (!Array.isArray(recipes)) throw new Error("Not an array");
     } catch {
       recipes = [];
     }
 
-    if (recipes.length < 2 || recipes.length > 4) recipes = [];
+    // Retry once at T=0.2 if parse failed or recipe count invalid
+    if (recipes.length < 2 || recipes.length > 6) {
+      const retryData = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`
+        },
+        body: JSON.stringify({ ...payload, temperature: 0.2 })
+      }).then(r => r.json());
 
-    // Store in cache
-    cache.set(key, recipes);
+      try {
+        recipes = JSON.parse(retryData.choices?.[0]?.message?.content ?? "[]");
+      } catch { recipes = []; }
+    }
 
-    return {
-      statusCode: 200,
-      body: JSON.stringify(recipes)
-    };
+    /* ---------------- Only cache *valid* results ---------------- */
+    if (recipes.length >= 2 && recipes.length <= 6) {
+      cache.set(key, { ts: Date.now(), recipes });
+    }
+
+    return { statusCode: 200, body: JSON.stringify(recipes) };
   } catch (err) {
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: "Server error. Please try again later." })
-    };
+    console.error(err);
+    return { statusCode: 500, body: JSON.stringify({ error: "Server error." }) };
   }
 }
+
+/* ------------------------------------------------------------------ *
+ * 4. Function‑level rate‑limit (Netlify native)
+ * ------------------------------------------------------------------ */
+export const config = {
+  rateLimit: { window: "60 s", limit: 20, action: "block" }
+};
