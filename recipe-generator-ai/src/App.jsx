@@ -581,7 +581,9 @@ function App() {
 
     if (ingredients.length <= 2) {
       setMsg(
-        "ℹ️ With only a couple of ingredients, some recipes may add 1–2 basic staples."
+        <span className="text-blue-500">
+        ℹ️ With only a couple of ingredients, some recipes may add 1–2 basic staples.
+      </span>
       );
     } else {
       setMsg("");
