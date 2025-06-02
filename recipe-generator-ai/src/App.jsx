@@ -72,16 +72,27 @@ function App() {
 
   const validateIngredient = (word) => {
     const clean = word.trim().toLowerCase();
-    const isValid = /^[a-z\s\-]{2,20}$/.test(clean);
   
-    if (!isValid) return false;
+    // Base check: only letters, spaces, hyphens, and correct length
+    const isValidFormat = /^[a-z\s\-]{2,20}$/.test(clean);
+  
+    if (!isValidFormat) return false;
+  
+    // Always allow certain known words even if they fail other rules
     if (allowList.includes(clean)) return true;
   
+    // Must have at least 1 vowel or 'y'
     const hasVowelOrY = /[aeiouy]/.test(clean);
+  
+    // Must not be a blacklisted word
     const isBlacklisted = blacklist.includes(clean);
   
-    return hasVowelOrY && !isBlacklisted;
+    // Must NOT contain 3 or more consecutive consonants (like "jwr" or "ndq")
+    const hasBadChunk = /[^aeiouy\s\-]{3,}/.test(clean);
+  
+    return hasVowelOrY && !isBlacklisted && !hasBadChunk;
   };
+  
   
 
   const handleAddIngredient = () => {
