@@ -76,15 +76,19 @@ function App() {
     "has", "done", "deli", "test", "sample", "none", "empty", "blank", "what", "how", "why", "idk"
   ];
   
-  // Simple English check (has vowel or 'y')
   const hasVowelOrY = (word) => /[aeiouy]/.test(word);
   
-  // Main validator
+  // ✅ Final stricter validation
   const validateIngredient = (word) => {
     const clean = word.trim().toLowerCase();
   
-    const isFormatValid = /^[a-z\s\-]{2,20}$/.test(clean); // Only a-z, spaces, hyphens, 2–20 chars
+    // 1. Only allow lowercase letters, spaces and hyphens, length 2–20
+    const isFormatValid = /^[a-z\s\-]{2,20}$/.test(clean);
+  
+    // 2. Must contain at least one vowel or y
     const hasVowel = hasVowelOrY(clean);
+  
+    // 3. Must not be in forbidden list
     const isForbidden = forbiddenWords.includes(clean);
   
     return isFormatValid && hasVowel && !isForbidden;
