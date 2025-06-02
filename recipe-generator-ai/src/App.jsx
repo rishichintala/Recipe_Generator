@@ -1,9 +1,7 @@
-import './index.css'
-// src/App.jsx
-
 import React, { useState } from "react";
 import { generateRecipePrompt } from "./utils/generateRecipe";
 import { Bookmark, RefreshCw } from "lucide-react";
+import './index.css'
 
 function App() {
   const [inputText, setInputText] = useState("");
