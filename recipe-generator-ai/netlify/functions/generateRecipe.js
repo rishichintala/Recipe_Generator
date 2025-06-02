@@ -40,7 +40,7 @@ export async function handler(event) {
 You are "Hestia", a friendly home‑cook assistant.
 
 OUTPUT RULES:
-- Return 2–4 recipes in valid JSON only.
+- Return 4–6 recipes in valid JSON only.
 - Each recipe must include:
   • name (string, 2–8 words),
   • servings (integer 1–6),
@@ -53,7 +53,7 @@ OUTPUT RULES:
 `.trim();
 
     const userPrompt = `
-Create 2–4 recipes using ALL these ingredients:
+Create 4–6 recipes using ALL these ingredients:
 ${ingredients.join(", ")}
 
 Avoid repeating previous recipes. Output JSON array only.
@@ -72,8 +72,8 @@ Avoid repeating previous recipes. Output JSON array only.
     }
 
     const payload = {
-      model: "gpt-3.5-turbo",
-      temperature: 0.7,
+      model: "gpt-4o",
+      temperature: 0.8,
       messages
     };
 
