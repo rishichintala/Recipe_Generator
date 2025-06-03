@@ -84,7 +84,7 @@ Each element is an object with these keys IN THIS ORDER:
 • instructions       – 5-8 concise steps
 
 ↘︎ QUANTITY RULE
-Always output **exactly 5 recipes** — never more, never fewer.
+Always output **exactly 4 recipes** — never more, never fewer.
 
 ↘︎ INGREDIENT RULES
 1-2. “Core-Only” block – use *only* the ingredients provided by the user.  
@@ -112,7 +112,7 @@ const messages = [
 
 const payload = {
   model: "gpt-3.5-turbo",
-  temperature: 0.7,
+  temperature: 0.6,
   max_tokens: 900,
   messages
 };
