@@ -240,13 +240,14 @@ function App() {
       <main className="max-w-3xl mx-auto px-4 py-10">
         <section className="bg-white rounded-xl shadow p-6 mb-10">
           <h2 className="text-2xl text-green-700 mb-3 font-semibold">
-            What's in your fridge?
+            What's in your Kitchen?
           </h2>
 
           <div className="bg-blue-50 text-blue-800 px-3 py-2 rounded text-sm mb-3">
             Add ingredients one at a time by typing{" "}
             <strong>Enter or you can press add button</strong>. 
-            Example: enter ingredient then press enter or click on add button.
+            Example:Type your ingredient in the box provided then press enter or click on add button.
+            And enter only one ingredient at a time.
             Remove any by clicking ×.
           </div>
 
