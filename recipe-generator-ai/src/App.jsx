@@ -247,7 +247,6 @@ function App() {
             Add ingredients one at a time by typing{" "}
             <strong>Enter or you can press add button</strong>. 
             Example:Type your ingredient in the box provided then press enter or click on add button.
-            And enter only one ingredient at a time.
             Remove any by clicking ×.
           </div>
 
