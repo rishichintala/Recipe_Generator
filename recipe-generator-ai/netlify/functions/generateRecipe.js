@@ -90,12 +90,10 @@ Always output **exactly 5 recipes** — never more, never fewer.
 1-2. “Core-Only” block – use *only* the ingredients provided by the user.  
 3-5. “Pantry-Plus” block – may add common pantry staples (oil, salt, pepper, water, basic spices)  
   or up to two popular complementary items (e.g. avocado, beans).
-
 ↘︎ OTHER GUIDELINES
 • Reuse all user-supplied ingredients in every recipe.  
 • Keep recipes affordable and home-kitchen-friendly.  
 • Minimise food waste.
-• Reject nonsensical ingredient names or anything that isn’t a real food item. check thoroughly.
 • Avoid recipes whose name or main ingredients match “previousRecipes”.
 `.trim();
 
