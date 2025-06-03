@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { generateRecipePrompt } from "./utils/generateRecipe";
 import { Bookmark, RefreshCw, X } from "lucide-react";
+import IngredientDemo from "./IngredientDemo";
 import "./index.css";
 
 /* ———————————————————————————————————
@@ -157,7 +158,7 @@ function App() {
     const clean = input.trim().toLowerCase();
 
     if (!validateIngredient(clean)) {
-      setMsg("❌ Please enter a real ingredient only");
+      setMsg("❌ Please enter valid Ingredients");
       clearMsg();
     } else if (!ingredients.includes(clean)) {
       setIngredients((prev) => [...prev, clean]);
@@ -243,19 +244,19 @@ function App() {
             What's in your Kitchen?
           </h2>
 
-          <div className="bg-blue-50 text-blue-800 px-3 py-2 rounded text-sm mb-3">
+          {/* <div className="bg-blue-50 text-blue-800 px-3 py-2 rounded text-sm mb-3">
             Add ingredients one at a time by typing{" "}
             <strong>Enter or you can press add button</strong>. 
             Example:Type your ingredient in the box provided then press enter or click on add button.
             Remove any by clicking ×.
-          </div>
-
+          </div> */}
+          {ingredients.length === 0 && <IngredientDemo />}
           <div className="flex gap-3 mb-4">
             <input
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Enter here ..."
+              placeholder="Type here ..."
               className="flex-1 border border-green-200 rounded px-4 py-2"
             />
             <button
