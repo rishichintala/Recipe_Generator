@@ -41,7 +41,8 @@ const alwaysAllow = new Set([
    1.  FULL “chatty” blacklist
    ——————————————————————————————————— */
 const chattyWords = new Set([
-  "hi","hello","bye","goodbye","see you","thanks","thank you","lol","haha",
+  "hi","hello","bye","goodbye","see you","thanks","thank you","lol","haha","mon",
+   "abc", "xyz", "qwe", "lorem", "ipsum", "foo", "bar", "baz",
   "nothing","no ingredients","test","sample","asdf","qwerty","what","how","why",
   "stop","cancel","clear","exit","nice","awesome","cool","google","search","weather",
   "recipe ideas","help","bug","problem","error","cooking tips","this isn't working",
@@ -178,6 +179,8 @@ function App() {
 
   const handleClearAll = () => setIngredients([]);
 
+  
+
   /* ——— RECIPE (AI) HANDLERS ——— */
   const toggleSave = (recipe) => {
     const exists = saved.some((r) => r.name === recipe.name);
@@ -218,6 +221,13 @@ function App() {
     setLoading(true);
     try {
       const data = await generateRecipePrompt(ingredients);
+
+      if (data.error) {
+        setMsg("❌ " + data.error);
+        clearMsg();
+        return;
+      }
+  
       setRecipes(data);
     } catch (err) {
       console.error(err);
