@@ -18,7 +18,7 @@ const IngredientDemo = () => {
   const rawHtml = `👉 Start typing ingredients like <strong>"tomato"</strong>, <strong>"cheese"</strong>, or <strong>"chicken"</strong> and press <strong>Enter</strong> or click on <strong>Add button</strong> to add them.
        Remove any by clicking <strong> × </strong>.
 
-       <strong>If you enter correct ingredients and yet you don't get the recipes , try again please.</strong>`;
+       <strong>If you enter the correct ingredients and still don't get the recipes, please try again.</strong>`;
 
   const [charIndex, setCharIndex] = useState(0);
   const [isDone, setIsDone] = useState(false);
