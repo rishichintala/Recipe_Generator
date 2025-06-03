@@ -245,7 +245,9 @@ function App() {
 
           <div className="bg-blue-50 text-blue-800 px-3 py-2 rounded text-sm mb-3">
             Add ingredients one at a time by typing{" "}
-            <strong>Enter or you can press add button</strong>. Remove any by clicking ×.
+            <strong>Enter or you can press add button</strong>. 
+            Example: enter ingredient then press enter or click on add button.
+            Remove any by clicking ×.
           </div>
 
           <div className="flex gap-3 mb-4">
