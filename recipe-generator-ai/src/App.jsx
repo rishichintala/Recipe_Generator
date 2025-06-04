@@ -33,7 +33,7 @@ const alwaysAllow = new Set([
   "eggplant","spritz","butternut squash","eggnog","shrub","bryndza cheese",
   "eggroll","schmaltz","schnapps","spam","deli","goat's cheese","1% milk","7‑grain bread",
   "jalapeños","salt & pepper","chèvre","ale", "gin" ,"fig","deli turkey","sliced turkey",
-  "deli chicken","sliced chicken","ranch","diced eggs"
+  "deli chicken","sliced chicken","ranch","diced eggs","apple"
 
 ]);
 
