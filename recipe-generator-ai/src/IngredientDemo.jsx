@@ -15,10 +15,13 @@
 import React, { useEffect, useState } from "react";
 
 const IngredientDemo = () => {
-  const rawHtml = `👉 Start typing ingredients like <strong>"tomato"</strong>, <strong>"cheese"</strong>, or <strong>"chicken"</strong> and press <strong>Enter</strong> or click on <strong>Add button</strong> to add them.
+  const rawHtml = `👉 Start typing ingredients like <strong>"tomato"</strong>, <strong>"cheese"</strong>, or <strong>"chicken"</strong> etc and press <strong>Enter</strong> or click on <strong>Add button</strong> to add them.
        Remove any by clicking <strong> × </strong>.
-
-       <strong>If you enter the correct ingredients and still don't get the recipes, please try again.</strong>`;
+       <strong>Tip:</strong> Make sure to enter clear and relevant ingredients.<br>
+       <strong>Note:</strong> If you don't get any recipes or see an error, our server might be taking too long to respond. Please try again shortly.
+       `;
+  
+       
 
   const [charIndex, setCharIndex] = useState(0);
   const [isDone, setIsDone] = useState(false);
