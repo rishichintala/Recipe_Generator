@@ -17,8 +17,8 @@ import React, { useEffect, useState } from "react";
 const IngredientDemo = () => {
   const rawHtml = `👉 Start typing ingredients like <strong>"tomato"</strong>, <strong>"cheese"</strong>, or <strong>"chicken"</strong> etc and press <strong>Enter</strong> or click on <strong>Add button</strong> to add them.
        Remove any by clicking <strong> × </strong>.
-       <strong>Tip:</strong> Make sure to enter clear and relevant ingredients.<br>
-       <strong>Note:</strong> If you don't get any recipes or see an error, our server might be taking too long to respond. Please try again shortly.
+       <strong>Tip:</strong> Make sure your ingredients are simple and relevant. If no results appear, give it another try!
+
        `;
   
        

@@ -242,16 +242,16 @@ function App() {
   return (
     <div className="min-h-screen bg-green-50 text-gray-800 font-sans">
       <header className="text-center py-6 bg-green-100 shadow">
-        <h1 className="text-4xl font-bold text-black">👨‍🍳🤖 What’s Cooking?</h1>
+        <h1 className="text-4xl font-bold text-black">🍳✨ Your AI-Powered Kitchen Assistant</h1>
         <p className="text-md text-black italic">
-          Delicious Ideas, Powered by AI
+        Smart recipes from the ingredients you have!
         </p>
       </header>
 
       <main className="max-w-3xl mx-auto px-4 py-10">
         <section className="bg-white rounded-xl shadow p-6 mb-10">
           <h2 className="text-2xl text-green-700 mb-3 font-semibold">
-            What's in your Kitchen?
+          From Input to Indulgence — Let’s Cook Something Smart 🔍🥘
           </h2>
 
           {/* <div className="bg-blue-50 text-blue-800 px-3 py-2 rounded text-sm mb-3">
