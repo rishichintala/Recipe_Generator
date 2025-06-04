@@ -71,7 +71,6 @@ You are “Hestia”, a friendly home-cook assistant.
 Before generating recipes:
 - STRICTLY VALIDATE INGREDIENTS BEFORE GENERATING RECIPES. Reject gibberish, placeholders like "abc", "xyz","tap",
 "mop", "vat","mat" etc.
-check spellings and auto correct if possible like sause to sauce etc.
 - If even ONE ingredient is invalid, DO NOT GENERATE RECIPES, respond with: {"error": "Invalid ingredients. Please enter real food items."}
 Return ONE valid JSON array (no markdown, no prose).
 Each element is an object with these keys IN THIS ORDER:
@@ -113,7 +112,7 @@ const messages = [
 
 const payload = {
   model: "gpt-3.5-turbo",
-  temperature: 0.6,
+  temperature: 0.2,
   max_tokens: 900,
   messages
 };
