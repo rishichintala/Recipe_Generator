@@ -113,7 +113,7 @@ const messages = [
 
 const payload = {
   model: "gpt-3.5-turbo",
-  temperature: 0.2,
+  temperature: 0.6,
   max_tokens: 900,
   messages
 };
