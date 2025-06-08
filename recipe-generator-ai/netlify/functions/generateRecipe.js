@@ -135,7 +135,7 @@ const payload = {
     try {
       raw = await openAiCall;
     } finally {
-      inflight.delete(key);       // clean no matter what
+      inflight.delete(key);     
     }
 
     /* ---------------- Parse & validate ---------------- */
@@ -147,7 +147,7 @@ const payload = {
       recipes = [];
     }
 
-    // Retry once at T=0.2 if parse failed or recipe count invalid
+    
     if (recipes.length < 2 || recipes.length > 6) {
       const retryData = await fetch("https://api.openai.com/v1/chat/completions", {
         method: "POST",
@@ -179,5 +179,5 @@ const payload = {
  * 4. Function‑level rate‑limit (Netlify native)
  * ------------------------------------------------------------------ */
 export const config = {
-  rateLimit: { window: "60 s", limit: 20, action: "block" }
+  rateLimit: { window: "60 s", limit: 10, action: "block" }
 };

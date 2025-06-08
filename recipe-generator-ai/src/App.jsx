@@ -253,13 +253,7 @@ function App() {
           <h2 className="text-2xl text-green-700 mb-3 font-semibold">
           From Input to Indulgence — Let’s Cook Something Smart 🔍🥘
           </h2>
-
-          {/* <div className="bg-blue-50 text-blue-800 px-3 py-2 rounded text-sm mb-3">
-            Add ingredients one at a time by typing{" "}
-            <strong>Enter or you can press add button</strong>. 
-            Example:Type your ingredient in the box provided then press enter or click on add button.
-            Remove any by clicking ×.
-          </div> */}
+          
           {ingredients.length === 0 && <IngredientDemo />}
           <div className="flex gap-3 mb-4">
             <input
