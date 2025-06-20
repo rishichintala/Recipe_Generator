@@ -60,4 +60,4 @@ Give a ⭐️ if this project helped you or you liked the project!
 Have questions? Reach out to me:
 - 💼 LinkedIn: [Sai Rishith Chintala](https://www.linkedin.com/in/sai-rishith-chintala)
 - 📧 Email: [rishi.chintala19@gmail.com](mailto:rishi.chintala19@gmail.com)
-- 🌐 Check out the live app: [Kitchen to Feast AI](https://kitchen-to-feast-ai.netlify.app/)
+- 🌐 Check out the live app: [Kitchen to Feast AI](https://kitchentofeastai.netlify.app/)
