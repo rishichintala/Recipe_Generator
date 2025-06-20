@@ -18,6 +18,29 @@
 
 ---
 
+## ❌ Drawbacks & Future Improvements
+
+### 1. Hardcoded Input Validation
+The current input validation uses a hardcoded blacklist and simple string checks to filter unsupported or irrelevant ingredients. While this works for a small-scale project or proof of concept, it's **not scalable** or flexible enough for diverse user inputs.
+
+**✔ Potential Improvements:**
+- Integrate third-party ingredient APIs like [Spoonacular](https://spoonacular.com/food-api) or [Edamam](https://developer.edamam.com/) etc for dynamic ingredient recognition.
+- Use fuzzy string matching (e.g., `fuzzywuzzy`, `RapidFuzz`) to handle typos and close variants.
+- Implement NLP-based input processing to extract valid ingredients from free-form text.
+- Add autocomplete/tag suggestion inputs to improve user experience and reduce errors.
+
+---
+
+### 2. Netlify Timeout Limitation (Free Tier)
+This project is hosted on Netlify's **free-tier**, which enforces a **10-second timeout** on serverless function execution. If the backend processing or OpenAI API call takes longer, the function silently times out and the user receives no response.
+
+**✔ Potential Improvements:**
+- Optimize prompt construction and reduce response latency by simplifying API calls.
+- Add client-side feedback (e.g., “Request timed out, please try again.”) to improve UX.
+- Migrate backend functions to a platform with longer execution limits (e.g., AWS Lambda, Vercel Pro).
+- Consider implementing background processing with polling or webhooks for long-running tasks.
+
+
 ## 💻 Usage
 
 ### 🧑‍🍳 1. Enter Ingredients
