@@ -11,7 +11,7 @@ const alwaysAllow = new Set([
   // — triple‑consonant foods —
   "pumpkin","blackberry","raspberry","buckwheat",
   "schnitzel","bratwurst","knackwurst","sauerkraut",
-  "gnocchi","tzatziki","knödel","chickpeas","chickpea",
+  "gnocchi","tzatziki","knödel","chickpeas","chickpea","bread crumbs","breadcrumbs",
 
   // — low‑vowel words —
   "shrimp",
